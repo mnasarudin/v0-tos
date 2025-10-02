@@ -2,7 +2,11 @@
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+<<<<<<< Updated upstream
 import { LayoutDashboard, Users, Settings, BarChart3, FileText, LogOut, ChevronLeft, ChevronRight } from "lucide-react"
+=======
+import { LayoutDashboard, Users, Settings, BarChart3, FileText, LogOut, ChevronLeft, ChevronRight, DollarSign, ChevronDown, Plus, List, ShoppingCart, Package, Boxes, Factory } from "lucide-react"
+>>>>>>> Stashed changes
 import { logout } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 
@@ -13,6 +17,62 @@ interface SidebarProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+<<<<<<< Updated upstream
+=======
+  { 
+    icon: DollarSign, 
+    label: "Budget", 
+    submenu: [
+      { icon: Plus, label: "Add Budget", href: "/budget/add" },
+      { icon: List, label: "Budget List", href: "/budget/list" }
+    ]
+  },
+  {
+    icon: ShoppingCart,
+    label: "Purchasing Requisition",
+    submenu: [
+      { icon: Plus, label: "Add PR", href: "/pr/add" },
+      { icon: List, label: "PR List", href: "/pr/list" },
+      { icon: FileText, label: "Report", href: "/pr/report" },
+    ]
+  },
+  {
+    icon: Package,
+    label: "Purchase Orders",
+    submenu: [
+      { icon: Plus, label: "Add PO", href: "/po/add" },
+      { icon: List, label: "PO List", href: "/po/list" },
+      { icon: FileText, label: "Report", href: "/po/report" },
+    ]
+  },
+  {
+    icon: Package,
+    label: "Items",
+    submenu: [
+      { icon: Plus, label: "Register Item", href: "/item/add" },
+      { icon: List, label: "Item List", href: "/item/list" },
+      { icon: FileText, label: "Usage Report", href: "/item/report" },
+    ]
+  },
+  {
+    icon: Boxes,
+    label: "Inventory",
+    submenu: [
+      { icon: List, label: "Stock Movement", href: "/inventory/stock" },
+      { icon: List, label: "Inventory List", href: "/inventory/list" },
+      { icon: FileText, label: "Report", href: "/inventory/report" },
+    ]
+  },
+  {
+    icon: Factory,
+    label: "Vendors",
+    submenu: [
+      { icon: Plus, label: "Register Vendor", href: "/vendor/add" },
+      { icon: List, label: "Vendor List", href: "/vendor/list" },
+          { icon: FileText, label: "Vendor Report", href: "/vendor/report" },
+    ]
+  },
+>>>>>>> Stashed changes
   { icon: Users, label: "Users", href: "/dashboard/users" },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
   { icon: FileText, label: "Reports", href: "/dashboard/reports" },
