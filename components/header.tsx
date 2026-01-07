@@ -1,51 +1,64 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Menu, Bell, Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getCurrentUser } from "@/lib/auth"
 import { useEffect, useState } from "react"
+import { Notifications } from "@/components/notifications"
+import { Menu } from "lucide-react"
 
 interface HeaderProps {
-  onMenuClick: () => void
+  onMenuClick?: () => void
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    setUser(getCurrentUser())
+    const fetchUser = async () => {
+      const currentUser = await getCurrentUser()
+      setUser(currentUser)
+    }
+    fetchUser()
   }, [])
 
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-      <div className="flex h-full items-center justify-between px-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden">
+      <div className="flex h-full items-center justify-between px-3 sm:px-4 md:px-6">
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onMenuClick}
+            className="lg:hidden h-9 w-9 p-0"
+            aria-label="Toggle menu"
+          >
             <Menu className="h-5 w-5" />
           </Button>
-
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search..." className="w-64 pl-10" />
-          </div>
+          <h1 className="text-base sm:text-lg font-semibold text-[#008B8B] truncate">
+            Intern Attendance System
+          </h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
-          </Button>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Notifications variant={user?.isAdmin ? 'admin' : 'intern'} />
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">{user?.name || "Admin"}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <p className="text-sm font-medium truncate max-w-[120px] md:max-w-none">
+                {user?.fullName || user?.username || "Admin"}
+              </p>
+              <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-none">
+                {user?.username || user?.email || ""}
+              </p>
             </div>
-            <Avatar>
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {user?.name?.charAt(0).toUpperCase() || "A"}
+            <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+              {user?.profilePhoto && (
+                <AvatarImage src={user.profilePhoto} alt={user?.fullName || user?.username} />
+              )}
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm">
+                {(user?.fullName || user?.username || "A")?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
