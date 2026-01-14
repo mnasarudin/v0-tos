@@ -167,13 +167,15 @@ export function VendorReport() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Vendor Report</h2>
-        <button
-          type="button"
-          onClick={handleExportPDF}
-          className="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted"
-        >
-          Export PDF
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            className="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted"
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

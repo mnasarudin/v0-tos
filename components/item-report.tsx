@@ -8,9 +8,6 @@ type ItemUsage = { id: string; sku: string; name: string; category: string; used
 
 export function ItemReport() {
   const data: ItemUsage[] = [
-    { id: "u1", sku: "ITM-001", name: "Safety Helmet", category: "Industrial", usedQty: 34, period: "2025-09" },
-    { id: "u2", sku: "ITM-002", name: "Office Chair", category: "Office", usedQty: 5, period: "2025-09" },
-    { id: "u3", sku: "ITM-003", name: "Printer Paper A4", category: "Office", usedQty: 18, period: "2025-09" },
     { id: "u4", sku: "ITM-004", name: "Laptop", category: "IT", usedQty: 2, period: "2025-09" },
   ]
 

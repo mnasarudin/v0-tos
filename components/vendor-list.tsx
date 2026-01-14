@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Plus, Edit, Trash2, FileText, Eye } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
@@ -65,10 +64,12 @@ export function VendorList() {
           <h2 className="text-2xl font-bold">Vendors</h2>
           <p className="text-muted-foreground">Manage registered vendors</p>
         </div>
-        <Button onClick={handleAdd}>
-          <Plus className="w-4 h-4 mr-2" />
-          Register Vendor
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button onClick={handleAdd}>
+            <Plus className="w-4 h-4 mr-2" />
+            Register Vendor
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -104,39 +105,9 @@ export function VendorList() {
                     <TableCell>{v.phone}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>{v.name}</DialogTitle>
-                              <DialogDescription>Vendor Details</DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-3">
-                              <div>
-                                <span className="font-medium">Category:</span> {v.category}
-                              </div>
-                              <div>
-                                <span className="font-medium">Email:</span> {v.email}
-                              </div>
-                              <div>
-                                <span className="font-medium">Address:</span> {v.address}
-                              </div>
-                              <div>
-                                <span className="font-medium">City:</span> {v.city}
-                              </div>
-                              <div>
-                                <span className="font-medium">Country:</span> {v.country}
-                              </div>
-                              <div>
-                                <span className="font-medium">Performance:</span> {v.performance}
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button size="sm" variant="outline" onClick={() => router.push(`/vendor/${encodeURIComponent(v.id)}`)}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => handleEdit(v)}>
                           <Edit className="w-4 h-4" />
                         </Button>

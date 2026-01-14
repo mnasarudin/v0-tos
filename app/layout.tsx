@@ -4,8 +4,16 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/toaster"
+import dynamic from "next/dynamic"
 import { Suspense } from "react"
 import "./globals.css"
+
+// Dynamically import chatbot client wrapper with SSR completely disabled
+// This ensures ZERO server-side rendering - not even in the HTML
+const ChatbotClient = dynamic(() => import("@/components/chatbot-client").then(mod => ({ default: mod.ChatbotClient })), {
+  ssr: false,
+  loading: () => null, // Don't show any loading state
+})
 
 export const metadata: Metadata = {
   title: "AdminHub - Dashboard",
@@ -25,6 +33,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Suspense>
+        <ChatbotClient />
         <Analytics />
       </body>
     </html>

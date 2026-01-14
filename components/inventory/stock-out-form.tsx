@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
+import { Pencil, Trash2 } from "lucide-react"
 
 interface StockOutItem {
   id: string
@@ -19,22 +21,66 @@ export function StockOutForm() {
   const { toast } = useToast()
   const [items, setItems] = useState<StockOutItem[]>([])
   const [form, setForm] = useState({ sku: "", name: "", quantity: "", reason: "Usage" })
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const addItem = () => {
     if (!form.sku || !form.name || !form.quantity) {
       toast({ title: "Missing fields", description: "Please fill SKU, Name and Quantity" })
       return
     }
-    setItems(prev => [
-      ...prev,
-      {
-        id: Math.random().toString(36).slice(2),
-        sku: form.sku,
-        name: form.name,
-        quantity: Number(form.quantity),
-        reason: form.reason,
-      }
-    ])
+
+    if (editingId) {
+      // Update existing item
+      setItems(prev => prev.map(item => 
+        item.id === editingId 
+          ? {
+              ...item,
+              sku: form.sku,
+              name: form.name,
+              quantity: Number(form.quantity),
+              reason: form.reason,
+            }
+          : item
+      ))
+      setEditingId(null)
+      toast({ title: "Item updated", description: "Item has been updated in the list" })
+    } else {
+      // Add new item
+      setItems(prev => [
+        ...prev,
+        {
+          id: Math.random().toString(36).slice(2),
+          sku: form.sku,
+          name: form.name,
+          quantity: Number(form.quantity),
+          reason: form.reason,
+        }
+      ])
+    }
+    setForm({ sku: "", name: "", quantity: "", reason: "Usage" })
+  }
+
+  const editItem = (item: StockOutItem) => {
+    setForm({
+      sku: item.sku,
+      name: item.name,
+      quantity: item.quantity.toString(),
+      reason: item.reason,
+    })
+    setEditingId(item.id)
+  }
+
+  const deleteItem = (id: string) => {
+    setItems(prev => prev.filter(item => item.id !== id))
+    if (editingId === id) {
+      setEditingId(null)
+      setForm({ sku: "", name: "", quantity: "", reason: "Usage" })
+    }
+    toast({ title: "Item removed", description: "Item has been removed from the list" })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
     setForm({ sku: "", name: "", quantity: "", reason: "Usage" })
   }
 
@@ -72,7 +118,16 @@ export function StockOutForm() {
             <Input value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} placeholder="Usage" />
           </div>
           <div className="sm:col-span-2 lg:col-span-3">
-            <Button type="button" onClick={addItem}>Add to list</Button>
+            <div className="flex gap-2">
+              <Button type="button" onClick={addItem}>
+                {editingId ? "Update Item" : "Add to list"}
+              </Button>
+              {editingId && (
+                <Button type="button" variant="outline" onClick={cancelEdit}>
+                  Cancel Edit
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -85,11 +140,48 @@ export function StockOutForm() {
           {items.length === 0 ? (
             <p className="text-sm text-muted-foreground">No items added yet.</p>
           ) : (
-            <ul className="list-disc pl-6 space-y-1">
-              {items.map(i => (
-                <li key={i.id}>{i.sku} - {i.name} — {i.quantity} pcs — {i.reason}</li>
-              ))}
-            </ul>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>SKU</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map(item => (
+                  <TableRow key={item.id} className={editingId === item.id ? "bg-muted/50" : ""}>
+                    <TableCell>{item.sku}</TableCell>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>{item.reason}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => editItem(item)}
+                          disabled={editingId === item.id}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => deleteItem(item.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
           <div className="mt-4">
             <Button type="button" onClick={submit} disabled={items.length === 0}>Submit</Button>

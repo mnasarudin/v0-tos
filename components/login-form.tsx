@@ -7,12 +7,15 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select } from "@/components/ui/select"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { setCurrentUser, type UserRole } from "@/lib/auth"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [role, setRole] = useState<UserRole>("HOD")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -45,9 +48,13 @@ export function LoginForm() {
         return
       }
 
-      // Store auth state
-      localStorage.setItem("isAuthenticated", "true")
-      localStorage.setItem("userEmail", email)
+      // Store auth state with role
+      setCurrentUser({
+        email,
+        name: email.split("@")[0],
+        role,
+        department: role === "HOD" ? "Head Office" : role === "AHOD" ? "Assistant Head Office" : role === "Staff" ? "Operations" : role === "Approval" ? "Finance" : "Procurement"
+      })
 
       toast({
         title: "Success",
@@ -110,6 +117,16 @@ export function LoginForm() {
             </Button>
           </div>
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="role">Role</Label>
+          <Select value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
+            <option value="HOD">HOD (Head of Department)</option>
+            <option value="AHOD">AHOD (Assistant Head of Department)</option>
+            <option value="Staff">Staff</option>
+            <option value="Approval">Approval</option>
+            <option value="Maker">Maker</option>
+          </Select>
+        </div>
         <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
           {isLoading ? (
             <>
@@ -123,6 +140,7 @@ export function LoginForm() {
       </form>
       <div className="text-center">
         <p className="text-sm text-muted-foreground">Demo: any email / password</p>
+        <p className="text-xs text-muted-foreground mt-1">Select a role to test different permission levels</p>
       </div>
     </div>
   )

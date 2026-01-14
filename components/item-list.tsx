@@ -13,17 +13,50 @@ type Item = {
   name: string
   category: string
   unit: string
+  price: number
   minStock: number
   location: string
+  image?: string
+  vendorId?: string
 }
 
 const ITEM_STORAGE_KEY = "app.items"
+
+function isValidImageUrl(url: string | undefined): boolean {
+  if (!url || url.trim() === "") return false
+  // Check if it's an absolute Windows path (C:/ or C:\)
+  if (url.match(/^[A-Z]:[/\\]/)) return false
+  // Check if it's a valid URL or relative path
+  return true
+}
+
+function sanitizeImageUrl(url: string | undefined): string {
+  if (!url || url.trim() === "" || !isValidImageUrl(url)) {
+    return "/placeholder.jpg"
+  }
+  return url
+}
 
 function readItems(): Item[] {
   if (typeof window === "undefined") return []
   try {
     const raw = localStorage.getItem(ITEM_STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as Item[]) : []
+    const items = raw ? (JSON.parse(raw) as Item[]) : []
+    // Sanitize image URLs
+    const sanitizedItems = items.map(item => ({
+      ...item,
+      image: sanitizeImageUrl(item.image)
+    }))
+    
+    // Update localStorage if images were sanitized
+    const needsUpdate = sanitizedItems.some((item, idx) => 
+      item.image !== (items[idx].image || undefined)
+    )
+    if (needsUpdate) {
+      localStorage.setItem(ITEM_STORAGE_KEY, JSON.stringify(sanitizedItems))
+    }
+    
+    return sanitizedItems
   } catch {
     return []
   }
@@ -58,10 +91,12 @@ export function ItemList() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Image</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Unit</TableHead>
+                <TableHead>Price</TableHead>
                 <TableHead>Min Stock</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Action</TableHead>
@@ -70,10 +105,26 @@ export function ItemList() {
             <TableBody>
               {items.map(i => (
                 <TableRow key={i.id}>
+                  <TableCell>
+                    <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
+                      <img 
+                        src={i.image || "/placeholder.jpg"} 
+                        alt={i.name}
+                        className="w-full h-full object-cover object-center"
+                        style={{ imageRendering: 'auto' }}
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "/placeholder.jpg";
+                        }}
+                      />
+                    </div>
+                  </TableCell>
                   <TableCell>{i.sku}</TableCell>
                   <TableCell>{i.name}</TableCell>
                   <TableCell>{i.category}</TableCell>
                   <TableCell>{i.unit}</TableCell>
+                  <TableCell>${i.price?.toFixed(2) || '0.00'}</TableCell>
                   <TableCell>{i.minStock}</TableCell>
                   <TableCell>{i.location}</TableCell>
                   <TableCell>

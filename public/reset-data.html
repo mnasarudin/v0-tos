@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset TOS Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .success {
+            background: #10b981;
+            padding: 10px;
+            border-radius: 4px;
+            color: white;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reset TOS Application Data</h1>
+        <p>Click the button below to reset items. This will keep only the Portable Router and remove all other items.</p>
+        
+        <button onclick="resetItems()">Keep Only Portable Router (with image)</button>
+        <button onclick="resetAll()">Reset All Data</button>
+        
+        <div id="success" class="success"></div>
+        
+        <div style="margin-top: 30px; padding: 15px; background: #fef3c7; border-radius: 4px;">
+            <strong>⚠️ Note:</strong> This will clear your localStorage data. Make sure you've saved any important information before proceeding.
+        </div>
+    </div>
+
+    <script>
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function resetItems() {
+            localStorage.removeItem('app.items');
+            // Set up Portable Router with proper image
+            const items = [
+                { id: "i1", sku: "ITM-001", name: "Portable Router", category: "IT", unit: "pcs", price: 45.00, minStock: 0, location: "Main", description: "Portable router for internet connectivity", image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800&auto=format&fit=crop" }
+            ];
+            localStorage.setItem('app.items', JSON.stringify(items));
+            showSuccess('✓ Items reset! Only Portable Router will appear with image. Refresh your application to see it.');
+        }
+
+        function resetAll() {
+            localStorage.clear();
+            showSuccess('✓ All data cleared! Refresh your application to start fresh.');
+        }
+    </script>
+</body>
+</html>
+
+

@@ -15,6 +15,7 @@ export interface Vendor {
   id: string
   name: string
   category: string
+  ssmNumber?: string
   contactName: string
   email: string
   phone: string
@@ -65,6 +66,7 @@ export function VendorForm() {
       id: crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
       name: "",
       category: "General",
+      ssmNumber: "",
       contactName: "",
       email: "",
       phone: "",
@@ -145,6 +147,10 @@ export function VendorForm() {
             <div>
               <Label htmlFor="name">Vendor Name</Label>
               <Input id="name" value={form.name} onChange={e => handleChange("name", e.target.value)} placeholder="Acme Corp" />
+            </div>
+            <div>
+              <Label htmlFor="ssmNumber">SSM Number</Label>
+              <Input id="ssmNumber" value={form.ssmNumber || ""} onChange={e => handleChange("ssmNumber", e.target.value)} placeholder="e.g. 202401234567 (Malaysia)" />
             </div>
             <div>
               <Label htmlFor="category">Category</Label>

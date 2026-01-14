@@ -9,6 +9,33 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
 
+const INVENTORY_STORAGE_KEY = "app.inventory"
+
+interface InventoryItem {
+  id: string
+  sku: string
+  name: string
+  quantity: number
+  unit: string
+  location: string
+  supplier?: string
+}
+
+function readInventory(): InventoryItem[] {
+  if (typeof window === "undefined") return []
+  try {
+    const raw = localStorage.getItem(INVENTORY_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as InventoryItem[]) : []
+  } catch {
+    return []
+  }
+}
+
+function writeInventory(items: InventoryItem[]) {
+  if (typeof window === "undefined") return
+  localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(items))
+}
+
 type MovementType = "in" | "out"
 
 type StockInItem = {
@@ -86,13 +113,123 @@ export function StockMovement() {
   }
 
   const submitIn = () => {
-    toast({ title: "Stock In recorded", description: `${inItems.length} item(s) added to inventory` })
-    setInItems([])
+    if (inItems.length === 0) {
+      toast({ title: "No items", description: "Please add items before submitting", variant: "destructive" })
+      return
+    }
+
+    try {
+      const currentInventory = readInventory()
+      const updatedInventory = [...currentInventory]
+
+      inItems.forEach(item => {
+        // Check if item with same SKU already exists
+        const existingIndex = updatedInventory.findIndex(inv => inv.sku === item.sku && inv.location === item.location)
+        
+        if (existingIndex >= 0) {
+          // Update existing item - add quantity
+          updatedInventory[existingIndex] = {
+            ...updatedInventory[existingIndex],
+            quantity: updatedInventory[existingIndex].quantity + item.quantity
+          }
+        } else {
+          // Add new item to inventory
+          updatedInventory.push({
+            id: `inv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            sku: item.sku,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            location: item.location,
+            supplier: item.supplier
+          })
+        }
+      })
+
+      writeInventory(updatedInventory)
+      
+      toast({ 
+        title: "Stock In recorded", 
+        description: `${inItems.length} item(s) added to inventory successfully` 
+      })
+      setInItems([])
+      
+      // Dispatch event to notify inventory list to refresh
+      window.dispatchEvent(new Event('inventory-updated'))
+    } catch (error) {
+      console.error("Error saving stock in:", error)
+      toast({ 
+        title: "Error", 
+        description: "Failed to save stock in data", 
+        variant: "destructive" 
+      })
+    }
   }
 
   const submitOut = () => {
-    toast({ title: "Stock Out recorded", description: `${outItems.length} item(s) deducted from inventory` })
-    setOutItems([])
+    if (outItems.length === 0) {
+      toast({ title: "No items", description: "Please add items before submitting", variant: "destructive" })
+      return
+    }
+
+    try {
+      const currentInventory = readInventory()
+      const updatedInventory = [...currentInventory]
+      const errors: string[] = []
+
+      outItems.forEach(item => {
+        // Find item in inventory by SKU
+        const inventoryItem = updatedInventory.find(inv => inv.sku === item.sku)
+        
+        if (!inventoryItem) {
+          errors.push(`${item.name} (${item.sku}) not found in inventory`)
+          return
+        }
+
+        if (inventoryItem.quantity < item.quantity) {
+          errors.push(`Insufficient stock for ${item.name} (${item.sku}). Available: ${inventoryItem.quantity}, Required: ${item.quantity}`)
+          return
+        }
+
+        // Deduct quantity
+        inventoryItem.quantity -= item.quantity
+
+        // Remove item if quantity reaches zero
+        if (inventoryItem.quantity <= 0) {
+          const index = updatedInventory.findIndex(inv => inv.id === inventoryItem.id)
+          if (index >= 0) {
+            updatedInventory.splice(index, 1)
+          }
+        }
+      })
+
+      if (errors.length > 0) {
+        toast({ 
+          title: "Stock Out Errors", 
+          description: errors.join(", "), 
+          variant: "destructive" 
+        })
+        return
+      }
+
+      writeInventory(updatedInventory)
+      
+      toast({ 
+        title: "Stock Out recorded", 
+        description: `${outItems.length} item(s) deducted from inventory successfully` 
+      })
+      setOutItems([])
+      
+      // Dispatch event to notify inventory list to refresh
+      window.dispatchEvent(new Event('inventory-updated'))
+    } catch (error) {
+      console.error("Error saving stock out:", error)
+      toast({ 
+        title: "Error", 
+        description: "Failed to save stock out data", 
+        variant: "destructive" 
+      })
+    }
   }
 
   const header = useMemo(() => activeTab === "in" ? "Stock In" : "Stock Out", [activeTab])
@@ -102,7 +239,7 @@ export function StockMovement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">{header}</h2>
-          <p className="text-muted-foreground">Record stock movement (mock data)</p>
+          <p className="text-muted-foreground">Record stock movement - data will be saved to inventory</p>
         </div>
         <div className="flex gap-2">
           <Button variant={activeTab === "in" ? "default" : "outline"} onClick={() => setActiveTab("in")}>Stock In</Button>

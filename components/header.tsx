@@ -6,6 +6,7 @@ import { Menu, Bell, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { getCurrentUser } from "@/lib/auth"
 import { useEffect, useState } from "react"
+import { RoleSwitcher } from "@/components/role-switcher"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -37,6 +38,8 @@ export function Header({ onMenuClick }: HeaderProps) {
             <Bell className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
           </Button>
+
+          <RoleSwitcher />
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
